@@ -1,0 +1,44 @@
+services:
+  seed:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["python", "-m", "app.seed"]
+    environment:
+      DB_PATH: /app/data/estoque.sqlite3
+      POLICY_PATH: /app/data/validadores_antecipe.json
+    volumes:
+      - ./data:/app/data
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      TZ: ${TZ:-America/Sao_Paulo}
+      DATA_REFERENCIA: ${DATA_REFERENCIA:-2026-10-22}
+      PROVEDOR_CADASTRAL: ${PROVEDOR_CADASTRAL:-simulado}
+      INTEGRIDADE_ATIVA: ${INTEGRIDADE_ATIVA:-true}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-50}
+      DB_PATH: /app/data/estoque.sqlite3
+      POLICY_PATH: /app/data/validadores_antecipe.json
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/saude')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy

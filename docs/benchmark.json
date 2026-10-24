@@ -1,0 +1,11 @@
+{
+  "stock_rows": 100000,
+  "funds": 18,
+  "batch_rows": 5000,
+  "approved": 5000,
+  "seed_seconds": 2.677,
+  "validation_with_snapshot_and_json_seconds": 0.323,
+  "under_3_seconds": true,
+  "provider": "simulated",
+  "synthetic": true
+}
